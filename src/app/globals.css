@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+a {
+  @apply underline text-blue-500 hover:text-blue-800 visited:text-purple-600;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+abbr {
+  @apply no-underline;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.Toastify__toast {
+  @apply text-base rounded p-4;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.react-calendar {
+  @apply w-[20rem] mt-10;
+}
+
+.react-calendar__navigation {
+  @apply flex;
+}
+
+.react-calendar__navigation > button {
+  @apply text-base py-2 px-4 rounded-full;
+}
+
+.react-calendar__navigation > button:hover {
+  @apply bg-gray-100;
+}
+
+.react-calendar__month-view__weekdays,
+.react-calendar__month-view__days,
+.react-calendar__year-view__months,
+.react-calendar__decade-view__years,
+.react-calendar__century-view__decades {
+  @apply mt-2;
+}
+
+.react-calendar__month-view__weekdays__weekday {
+  @apply text-base font-bold flex justify-center;
+}
+
+.react-calendar__month-view__days > button,
+.react-calendar__year-view__months > button,
+.react-calendar__decade-view__years > button,
+.react-calendar__century-view__decades > button {
+  @apply rounded-full h-11;
+}
+
+.react-calendar__month-view__days > button:hover:not([disabled]),
+.react-calendar__year-view__months > button:hover:not([disabled]),
+.react-calendar__decade-view__years > button:hover:not([disabled]),
+.react-calendar__century-view__decades > button:hover:not([disabled]) {
+  @apply bg-gray-100;
+}
+
+.react-calendar__month-view__days > button:disabled,
+.react-calendar__year-view__months > button:disabled,
+.react-calendar__decade-view__years > button:disabled,
+.react-calendar__century-view__decades > button:disabled {
+  @apply text-gray-400;
+}
+
+.react-calendar__tile--now {
+  @apply !text-blue-500 font-bold;
+}
+
+.react-calendar__tile--active {
+  @apply !bg-blue-500 !text-white font-bold;
 }

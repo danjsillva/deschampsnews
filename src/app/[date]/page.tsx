@@ -1,12 +1,16 @@
-import Link from "next/link";
-
 import Post from "@/components/post";
 import { getPostsByDate } from "@/services/post";
 import { IPost } from "@/types/post";
 import dayjs from "@/utils/dayjs";
 
-export default async function HomePage() {
-  const date = dayjs().format("YYYY-MM-DD");
+interface IProps {
+  params: {
+    date: string;
+  };
+}
+
+export default async function PostsPage({ params }: IProps) {
+  const { date } = params;
   const posts = await getPostsByDate(date);
 
   return (
@@ -19,14 +23,7 @@ export default async function HomePage() {
         {!posts.length && (
           <article className="border-t py-6 text-lg">
             <p>
-              <strong>As notícias de hoje chegam lá pelas 11.</strong> Veja a
-              última newsletter{" "}
-              <Link
-                href={`/${dayjs().subtract(1, "day").format("YYYY-MM-DD")}`}
-              >
-                aqui
-              </Link>
-              .
+              <strong>Nenhuma notícia encontrada.</strong>
             </p>
           </article>
         )}
@@ -35,8 +32,8 @@ export default async function HomePage() {
   );
 }
 
-export async function generateMetadata() {
+export async function generateMetadata({ params }: IProps) {
   return {
-    title: `Deschamps News - ${dayjs().format("DD [de] MMM [de] YYYY")}`,
+    title: `Deschamps News - ${dayjs(params.date).format("DD [de] MMM [de] YYYY")}`,
   };
 }
