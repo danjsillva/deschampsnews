@@ -22,6 +22,28 @@ export async function getPostsByDate({
   return posts;
 }
 
+export async function getPostByDateAndNumber({
+  date,
+  number,
+}: {
+  date: string;
+  number: string;
+}): Promise<IPost | null> {
+  const db = await mongodb.connect();
+
+  if (!dayjs(String(date)).isValid()) {
+    throw new Error("Invalid date");
+  }
+
+  if (!number) {
+    throw new Error("Invalid number");
+  }
+
+  const post = await db.collection("posts").findOne<IPost>({ date, number });
+
+  return post;
+}
+
 export async function likePost({
   date,
   number,

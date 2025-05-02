@@ -2,9 +2,9 @@ import * as cheerio from "cheerio";
 import { ImapFlow } from "imapflow";
 import { simpleParser } from "mailparser";
 
+import { IPost } from "@/types/post";
 import dayjs from "@/utils/dayjs";
 import mongodb from "@/utils/mongodb";
-import { IPost } from "@/types/post";
 
 const imapConfig = {
   host: "imap.zoho.com",
