@@ -7,31 +7,27 @@ import dayjs from "@/utils/dayjs";
 
 export default async function HomePage() {
   const date = dayjs().format("YYYY-MM-DD");
-  const posts = await getPostsByDate(date);
+  const posts = await getPostsByDate({ date });
 
   return (
-    <main className="flex-1 overflow-y-auto">
-      <section className="w-[36rem]">
-        {posts.map((post: IPost) => (
-          <Post key={post._id} post={post} />
-        ))}
+    <section>
+      {posts.map((post: IPost) => (
+        <Post key={post._id} post={post} />
+      ))}
 
-        {!posts.length && (
-          <article className="border-t py-6 text-lg">
-            <p>
-              <strong>As notícias de hoje chegam lá pelas 11.</strong> Veja a
-              última newsletter{" "}
-              <Link
-                href={`/${dayjs().subtract(1, "day").format("YYYY-MM-DD")}`}
-              >
-                aqui
-              </Link>
-              .
-            </p>
-          </article>
-        )}
-      </section>
-    </main>
+      {!posts.length && (
+        <article className="border-t py-6 text-lg">
+          <p>
+            <strong>As notícias de hoje chegam lá pelas 11.</strong> Veja a
+            última newsletter{" "}
+            <Link href={`/${dayjs().subtract(1, "day").format("YYYY-MM-DD")}`}>
+              aqui
+            </Link>
+            .
+          </p>
+        </article>
+      )}
+    </section>
   );
 }
 

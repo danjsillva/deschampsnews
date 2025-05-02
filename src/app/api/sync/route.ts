@@ -4,6 +4,7 @@ import { simpleParser } from "mailparser";
 
 import dayjs from "@/utils/dayjs";
 import mongodb from "@/utils/mongodb";
+import { IPost } from "@/types/post";
 
 const imapConfig = {
   host: "imap.zoho.com",
@@ -52,14 +53,13 @@ export async function GET() {
             $(el).removeAttr("id class style url-id");
           });
 
-        const html = $.html(paragraph).replace(/\s+/g, " ").trim();
+        const date = dayjs(emailDate).format("YYYY-MM-DD");
+        const number = String(index + 1).padStart(2, "0");
         const text = $(paragraph).text().replace(/\s+/g, " ").trim();
-        const number =
-          dayjs(emailDate).format("YYYYMMDD") +
-          String(index + 1).padStart(2, "0");
+        const html = $.html(paragraph).replace(/\s+/g, " ").trim();
 
-        const post = {
-          date: emailDate,
+        const post: IPost = {
+          date,
           number,
           text,
           html,
@@ -67,20 +67,17 @@ export async function GET() {
           entities: [],
           sponsored: false,
           likes: 0,
+          createdAt: emailDate,
+          updatedAt: emailDate,
         };
 
         await db.collection("posts").updateOne(
-          { number: post.number },
           {
-            $set: {
-              date: post.date,
-              number: post.number,
-              text: post.text,
-              html: post.html,
-              categories: post.categories,
-              entities: post.entities,
-              sponsored: post.sponsored,
-            },
+            date: post.date,
+            number: post.number,
+          },
+          {
+            $set: post,
           },
           { upsert: true },
         );

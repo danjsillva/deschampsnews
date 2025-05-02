@@ -19,12 +19,12 @@ export default function RootLayout({
 
   return (
     <html lang="pt-br">
-      <body className="flex justify-center gap-9 h-full overflow-hidden antialiased">
+      <body className="min-h-screen flex justify-center antialiased">
         <aside className="w-[24rem] flex-shrink-0">
           <Sidebar date={date} />
         </aside>
 
-        {children}
+        <main className="w-[36rem] overflow-y-auto">{children}</main>
 
         <ToastContainer position="bottom-left" hideProgressBar={true} />
       </body>
