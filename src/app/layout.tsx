@@ -19,7 +19,7 @@ export default function RootLayout({
 
   return (
     <html lang="pt-br">
-      <body className="min-h-screen flex justify-center antialiased">
+      <body className="w-full min-h-screen flex justify-center gap-9 antialiased">
         <aside className="w-[24rem] flex-shrink-0">
           <Sidebar date={date} />
         </aside>
