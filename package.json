@@ -12,6 +12,8 @@
     "cheerio": "^1.0.0",
     "dayjs": "^1.11.13",
     "dayjs-business-days2": "^1.3.0",
+    "dotenv": "^16.5.0",
+    "groq-sdk": "^0.21.0",
     "imapflow": "^1.0.186",
     "mailparser": "^3.7.2",
     "mongodb": "^6.16.0",

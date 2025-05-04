@@ -1,5 +1,7 @@
+import { ObjectId } from "mongodb";
+
 export interface IPost {
-  _id?: string;
+  _id?: ObjectId;
   date: string;
   number: string;
   text: string;

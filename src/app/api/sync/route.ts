@@ -4,6 +4,7 @@ import { simpleParser } from "mailparser";
 
 import { IPost } from "@/types/post";
 import dayjs from "@/utils/dayjs";
+import { getGroqCategory } from "@/utils/groq";
 import mongodb from "@/utils/mongodb";
 
 const imapConfig = {
@@ -58,14 +59,18 @@ export async function GET() {
         const text = $(paragraph).text().replace(/\s+/g, " ").trim();
         const html = $.html(paragraph).replace(/\s+/g, " ").trim();
 
+        const { categories, entities, sponsored } = await getGroqCategory({
+          text,
+        });
+
         const post: IPost = {
           date,
           number,
           text,
           html,
-          categories: [],
-          entities: [],
-          sponsored: false,
+          categories,
+          entities,
+          sponsored,
           likes: 0,
           createdAt: emailDate,
           updatedAt: emailDate,
