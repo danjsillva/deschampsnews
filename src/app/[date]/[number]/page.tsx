@@ -13,7 +13,7 @@ export default async function PostPage({ params }: IProps) {
   return (
     <section>
       {post ? (
-        <Post key={post._id} post={post} />
+        <Post key={post._id?.toString()} post={post} />
       ) : (
         <article className="border-t py-6 text-lg">
           <p>

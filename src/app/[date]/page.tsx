@@ -14,7 +14,7 @@ export default async function PostsPage({ params }: IProps) {
   return (
     <section>
       {posts.map((post: IPost) => (
-        <Post key={post._id} post={post} />
+        <Post key={post._id?.toString()} post={post} />
       ))}
 
       {!posts.length && (

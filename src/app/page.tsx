@@ -12,7 +12,7 @@ export default async function HomePage() {
   return (
     <section>
       {posts.map((post: IPost) => (
-        <Post key={post._id} post={post} />
+        <Post key={post._id?.toString()} post={post} />
       ))}
 
       {!posts.length && (
