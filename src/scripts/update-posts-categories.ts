@@ -20,6 +20,7 @@ async function main() {
     .find<IPost>({
       $or: [
         { categories: { $exists: false } },
+        { categories: { $eq: [] } },
         { entities: { $exists: false } },
         { sponsored: { $exists: false } },
       ],
@@ -28,9 +29,11 @@ async function main() {
     .limit(500)
     .toArray();
 
-  for (const post of posts) {
+  for (const [index, post] of posts.entries()) {
     try {
-      console.log(`Processing post ${post._id}...`);
+      console.log(
+        `Processing post ${post._id}... (${index + 1}/${posts.length})`,
+      );
 
       const response = await getGroqCategory({
         text: post.text,
@@ -56,11 +59,18 @@ async function main() {
       );
 
       console.log(updatedPost);
+      console.log(
+        `Processed post ${post._id} successfully! (${index + 1}/${posts.length})`,
+      );
     } catch (err) {
       console.error(`Erro ao processar post ${post._id}:`, err);
     }
 
-    await sleep(30000);
+    if (index % 2 === 0) {
+      console.log("Sleeping for 30 seconds...");
+
+      await sleep(30000);
+    }
   }
 
   console.timeEnd("Update posts categories");

@@ -59,6 +59,8 @@ export async function GET() {
         const text = $(paragraph).text().replace(/\s+/g, " ").trim();
         const html = $.html(paragraph).replace(/\s+/g, " ").trim();
 
+        if (!text) continue;
+
         const { categories, entities, sponsored } = await getGroqCategory({
           text,
         });
