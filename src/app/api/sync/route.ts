@@ -18,15 +18,34 @@ const imapConfig = {
   logger: undefined,
 };
 
-export async function GET() {
-  const messagesIds: number[] = [];
+export async function GET(request: Request) {
+  console.log("[SYNC] Cron job triggered at:", new Date().toISOString());
+
+  const authHeader = request.headers.get("authorization");
+  const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
+
+  if (process.env.CRON_SECRET && authHeader !== expectedAuth) {
+    console.log("[SYNC] Unauthorized: Invalid or missing CRON_SECRET");
+
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   let totalPosts = 0;
+  const messagesIds: number[] = [];
+  const startTime = Date.now();
 
   try {
+    console.log("[SYNC] Starting email sync process...");
+
     const db = await mongodb.connect();
     const clientProcess = new ImapFlow(imapConfig);
 
+    console.log("[SYNC] Connecting to IMAP server...");
+
     await clientProcess.connect();
+
+    console.log("[SYNC] Opening NewsLetter mailbox...");
+
     await clientProcess.mailboxOpen("NewsLetter", { readOnly: false });
 
     const messages = clientProcess.fetch(
@@ -34,7 +53,13 @@ export async function GET() {
       { envelope: true, source: true },
     );
 
+    let messageCount = 0;
+
     for await (const message of messages) {
+      messageCount++;
+
+      console.log(`[SYNC] Processing message ${messageCount}...`);
+
       const emailDate = message.envelope.date;
       const emailParsed = await simpleParser(message.source);
 
@@ -107,9 +132,22 @@ export async function GET() {
     await clientAddFlags.mailboxClose();
     await clientAddFlags.logout();
 
-    return Response.json({ success: true, posts: totalPosts });
+    const duration = Date.now() - startTime;
+
+    console.log(
+      `[SYNC] Success! Processed ${totalPosts} posts in ${duration}ms`,
+    );
+
+    return Response.json({
+      success: true,
+      posts: totalPosts,
+      duration: duration,
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
-    console.error(error);
+    const duration = Date.now() - startTime;
+
+    console.error("[SYNC] Error after", duration, "ms:", error);
 
     return Response.json(
       { success: false, error: String(error) },
