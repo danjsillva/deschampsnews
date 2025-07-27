@@ -61,3 +61,32 @@ export async function likePost({
 
   return { success: true };
 }
+
+export async function searchPosts({
+  query,
+  limit = 50,
+}: {
+  query: string;
+  limit?: number;
+}): Promise<IPost[]> {
+  const db = await mongodb.connect();
+  const collection = db.collection("posts");
+
+  if (!query || query.trim().length === 0) {
+    return [];
+  }
+
+  const posts = await collection
+    .find<IPost>({
+      $or: [
+        { text: { $in: [new RegExp(query, "i")] } },
+        { categories: { $in: [new RegExp(query, "i")] } },
+        { entities: { $in: [new RegExp(query, "i")] } },
+      ],
+    })
+    .sort({ date: -1 })
+    .limit(limit)
+    .toArray();
+
+  return posts;
+}

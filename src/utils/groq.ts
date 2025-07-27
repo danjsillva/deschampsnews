@@ -2,34 +2,53 @@ import Groq from "groq-sdk";
 
 const groq = new Groq();
 
+const models = [
+  "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant",
+  "gemma2-9b-it",
+];
+
 const prompts = [
   {
     type: "category",
-    message: `
-      Analise o texto abaixo e extraia as seguintes informações de forma estruturada:
+    message: `Você deve analisar o texto e retornar um objeto JSON com a seguinte estrutura:
+{
+  "categories": ["categoria1", "categoria2"],
+  "entities": ["entidade1", "entidade2"],
+  "sponsored": false
+}
 
-      1. **categories**: uma lista de áreas temáticas amplas relacionadas ao conteúdo em português do Brasil (ex: finanças, tecnologia, saúde, AI, educação, redes sociais). Evite termos muito específicos como "direitos digitais" ou "verificação". Use apenas palavras que seriam úteis para agrupar esse conteúdo com outros textos similares como é feito para posts de um blog.
+Regras OBRIGATÓRIAS:
+- categories: lista de temas amplos em português (MÍNIMO 1, máximo 3).
+- entities: nomes próprios relevantes (pessoas, empresas, lugares) (MÍNIMO 1). Se não houver entidades específicas, extraia o autor, fonte ou plataforma mencionada.
+- sponsored: true se o texto parece publicitário, false caso contrário
+- NUNCA retorne arrays vazios - sempre inclua pelo menos um item em categories e entities
 
-      2. **entities**: uma lista de nomes próprios relevantes em português do Brasil (pessoas, empresas, organizações, cidades, países etc). Ignore valores genéricos como preços, datas, horários, porcentagens, cores.
+Exemplos válidos:
+{"categories":["tecnologia","educação"],"entities":["Google","Brasil"],"sponsored":false}
+{"categories":["geral"],"entities":["Newsletter"],"sponsored":false}
 
-      3. **sponsored**: um valor booleano (true ou false) que indica se o texto parece ser patrocinado (ex: menção explícita a publicidade, promoção de marca, linguagem publicitária etc).
-
-      Retorne **apenas o JSON bruto**, sem explicações, comentários, pensamentos ou marcações. **A resposta deve começar diretamente com { e terminar com }**.
-
-      Retorne um objeto JSON com esta estrutura:
-      {
-        "categories": string[],
-        "entities": string[],
-        "sponsored": boolean
-      }
-
-      Texto: `,
+Texto para análise: `,
   },
 ];
 
+const extractDelayFromError = (errorMessage: string): number => {
+  const match = errorMessage.match(/try again in (\d+)m(\d+(?:\.\d+)?)s/i);
+  if (match) {
+    const minutes = parseInt(match[1]);
+    const seconds = parseFloat(match[2]);
+
+    return (minutes * 60 + seconds) * 1000;
+  }
+
+  return 60000;
+};
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const getGroqCategory = async ({
   text,
-  model = "deepseek-r1-distill-llama-70b",
+  model,
 }: {
   text: string;
   model?: string;
@@ -43,47 +62,101 @@ export const getGroqCategory = async ({
   }
 
   const prompt = prompts.find((prompt) => prompt.type === "category");
-
   if (!prompt) {
     throw new Error("Prompt not found");
   }
 
-  const response = await groq.chat.completions.create({
-    messages: [
-      {
-        role: "user",
-        content: `${prompt?.message}${text}`,
-      },
-    ],
-    model,
-  });
+  const modelsToTry = model
+    ? [model, ...models.filter((m) => m !== model)]
+    : models;
 
-  const content = response.choices[0].message.content?.trim();
-  const jsonMatch = content?.match(/\{[\s\S]*\}/);
+  for (const currentModel of modelsToTry) {
+    console.log(`[GROQ] Trying model: ${currentModel}`);
 
-  if (!jsonMatch) {
-    throw new Error("JSON not found");
-  }
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        console.log(`[GROQ] Attempt ${attempt}/3 with ${currentModel}`);
 
-  try {
-    const jsonObject = JSON.parse(jsonMatch[0]);
+        const response = await groq.chat.completions.create({
+          messages: [
+            {
+              role: "system",
+              content:
+                "Você é um assistente que retorna APENAS objetos JSON válidos, sem texto adicional.",
+            },
+            {
+              role: "user",
+              content: `${prompt.message}${text}`,
+            },
+          ],
+          model: currentModel,
+          temperature: 0.1,
+          max_tokens: 500,
+          response_format: { type: "json_object" },
+        });
 
-    if (
-      !jsonObject.categories ||
-      !Array.isArray(jsonObject.categories) ||
-      !jsonObject.entities ||
-      !Array.isArray(jsonObject.entities) ||
-      typeof jsonObject.sponsored !== "boolean"
-    ) {
-      throw new Error("Invalid JSON structure");
+        const content = response.choices[0].message.content?.trim();
+
+        console.log("[GROQ] Raw response:", content);
+
+        try {
+          const jsonObject = JSON.parse(content || "{}");
+
+          if (
+            !jsonObject.categories ||
+            !Array.isArray(jsonObject.categories) ||
+            !jsonObject.entities ||
+            !Array.isArray(jsonObject.entities) ||
+            typeof jsonObject.sponsored !== "boolean"
+          ) {
+            throw new Error("Invalid JSON structure");
+          }
+
+          console.log(`[GROQ] Success with ${currentModel}`);
+          return {
+            categories: jsonObject.categories,
+            entities: jsonObject.entities,
+            sponsored: jsonObject.sponsored,
+          };
+        } catch (parseError) {
+          console.error("[GROQ] JSON parse error:", parseError);
+          console.error("[GROQ] Content:", content);
+
+          if (attempt === 3) {
+            throw parseError;
+          }
+        }
+      } catch (error: any) {
+        console.error(`[GROQ] Error on attempt ${attempt}:`, error.message);
+
+        if (error.status === 429) {
+          const errorMessage = error.error?.message || error.message || "";
+          const delay = extractDelayFromError(errorMessage);
+
+          console.log(`[GROQ] Rate limit hit. Waiting ${delay / 1000}s...`);
+
+          await sleep(delay);
+
+          continue;
+        }
+
+        if (attempt === 3) {
+          console.log(
+            `[GROQ] Failed all attempts with ${currentModel}, trying next model...`,
+          );
+          break;
+        }
+
+        await sleep(2000);
+      }
     }
-
-    return {
-      categories: jsonObject.categories,
-      entities: jsonObject.entities,
-      sponsored: jsonObject.sponsored,
-    };
-  } catch (error) {
-    throw new Error("Invalid JSON" + error);
   }
+
+  console.error("[GROQ] All models failed. Returning fallback values.");
+
+  return {
+    categories: [],
+    entities: [],
+    sponsored: false,
+  };
 };

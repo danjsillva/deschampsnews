@@ -1,25 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, useEffect, Fragment } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 
 import dayjs from "@/utils/dayjs";
 
 interface IProps {
   date?: string;
-  search?: string;
   results?: number;
 }
 
 export default function Sidebar(props: IProps) {
-  const [search, setSearch] = useState(props.search);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryParam = searchParams.get("q") || "";
+
+  const [search, setSearch] = useState(queryParam);
 
   useEffect(() => {
-    setSearch(props.search);
-  }, [props.search]);
+    setSearch(queryParam);
+  }, [queryParam]);
 
   const handleChangeDate = (value: Date | unknown) => {
     if (!(value instanceof Date)) {
@@ -36,8 +38,8 @@ export default function Sidebar(props: IProps) {
   const handleSubmitSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (search) {
-      return router.push(`/search?q=${search}`);
+    if (search?.trim()) {
+      return router.push(`/search?q=${encodeURIComponent(search.trim())}`);
     }
 
     return router.push("/");
@@ -49,41 +51,33 @@ export default function Sidebar(props: IProps) {
         <h1 className="text-6xl font-bold text-black mt-16">Deschamps News</h1>
       </Link>
 
-      {props.date && (
-        <Fragment>
-          <Calendar
-            onChange={handleChangeDate}
-            value={dayjs(props.date).toDate()}
-            locale="pt-BR"
-            minDate={dayjs("2020-12-10").toDate()}
-            maxDate={dayjs().toDate()}
-            next2Label={null}
-            prev2Label={null}
-            tileDisabled={({ date }) =>
-              dayjs(date).weekday() === 0 || dayjs(date).weekday() === 6
-            }
+      <Calendar
+        onChange={handleChangeDate}
+        value={dayjs(props.date).toDate()}
+        locale="pt-BR"
+        minDate={dayjs("2020-12-10").toDate()}
+        maxDate={dayjs().toDate()}
+        next2Label={null}
+        prev2Label={null}
+        tileDisabled={({ date }) =>
+          dayjs(date).weekday() === 0 || dayjs(date).weekday() === 6
+        }
+      />
+
+      <form onSubmit={handleSubmitSearch} className="mt-10">
+        <div className="border border-gray-200 rounded py-3 px-4">
+          <input
+            type="text"
+            value={search}
+            className="outline-none"
+            onChange={(e) => setSearch(e.target.value)}
           />
-        </Fragment>
-      )}
 
-      {props.search && (
-        <Fragment>
-          <form onSubmit={handleSubmitSearch} className="mt-10">
-            <div className="border rounded py-3 px-4">
-              <input
-                type="text"
-                value={search}
-                className="outline-none"
-                onChange={(e) => setSearch(e.target.value)}
-              />
-
-              <span className="text-sm text-gray-400">
-                {props.results} resultado(s)
-              </span>
-            </div>
-          </form>
-        </Fragment>
-      )}
+          <span className="text-sm text-gray-400">
+            {props.results} resultado(s)
+          </span>
+        </div>
+      </form>
     </section>
   );
 }
