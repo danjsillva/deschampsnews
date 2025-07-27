@@ -3,7 +3,6 @@ import { ToastContainer } from "react-toastify";
 
 import "./globals.css";
 import Sidebar from "@/components/sidebar";
-import dayjs from "@/utils/dayjs";
 
 export const metadata: Metadata = {
   title: "Deschamps News",
@@ -15,13 +14,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const date = dayjs().format("YYYY-MM-DD");
-
   return (
     <html lang="pt-br">
       <body className="w-full min-h-screen flex justify-center gap-9 antialiased">
         <aside className="w-[24rem] flex-shrink-0">
-          <Sidebar date={date} />
+          <Sidebar />
         </aside>
 
         <main className="w-[36rem] overflow-y-auto">{children}</main>

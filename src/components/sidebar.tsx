@@ -1,23 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 
 import dayjs from "@/utils/dayjs";
+import { FaTimes } from "react-icons/fa";
 
-interface IProps {
-  date?: string;
-  results?: number;
-}
-
-export default function Sidebar(props: IProps) {
+export default function Sidebar() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryParam = searchParams.get("q") || "";
 
   const [search, setSearch] = useState(queryParam);
+
+  const getSelectedDate = () => {
+    const dateMatch = pathname.match(/^\/(\d{4}-\d{2}-\d{2})$/);
+
+    if (dateMatch) return dateMatch[1];
+
+    return dayjs().format("YYYY-MM-DD");
+  };
 
   useEffect(() => {
     setSearch(queryParam);
@@ -53,7 +58,7 @@ export default function Sidebar(props: IProps) {
 
       <Calendar
         onChange={handleChangeDate}
-        value={dayjs(props.date).toDate()}
+        value={dayjs(getSelectedDate()).toDate()}
         locale="pt-BR"
         minDate={dayjs("2020-12-10").toDate()}
         maxDate={dayjs().toDate()}
@@ -73,9 +78,14 @@ export default function Sidebar(props: IProps) {
             onChange={(e) => setSearch(e.target.value)}
           />
 
-          <span className="text-sm text-gray-400">
-            {props.results} resultado(s)
-          </span>
+          {search && (
+            <span
+              className="text-sm text-gray-400 cursor-pointer"
+              onClick={() => setSearch("")}
+            >
+              <FaTimes className="inline-block" />
+            </span>
+          )}
         </div>
       </form>
     </section>
