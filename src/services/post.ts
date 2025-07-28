@@ -74,7 +74,8 @@ export async function searchPosts({
   const db = await mongodb.connect();
   const collection = db.collection("posts");
 
-  const filter: any = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filter: Record<string, any> = {};
 
   if (query && query.trim().length > 0) {
     filter.text = { $in: [new RegExp(query, "i")] };

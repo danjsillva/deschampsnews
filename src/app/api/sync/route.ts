@@ -60,7 +60,9 @@ export async function GET(request: Request) {
 
       console.log(`[SYNC] Processing message ${messageCount}...`);
 
-      const emailDate = message.envelope.date;
+      if (!message.envelope || !message.source) continue;
+      
+      const emailDate = message.envelope.date || new Date();
       const emailParsed = await simpleParser(message.source);
 
       if (!emailParsed.html) continue;

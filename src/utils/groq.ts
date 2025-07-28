@@ -130,11 +130,13 @@ export const getGroqCategory = async ({
             throw parseError;
           }
         }
-      } catch (error: any) {
-        console.error(`[GROQ] Error on attempt ${attempt}:`, error.message);
+      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const err = error as any;
+        console.error(`[GROQ] Error on attempt ${attempt}:`, err.message);
 
-        if (error.status === 429) {
-          const errorMessage = error.error?.message || error.message || "";
+        if (err.status === 429) {
+          const errorMessage = err.error?.message || err.message || "";
           const delay = extractDelayFromError(errorMessage);
 
           console.log(`[GROQ] Rate limit hit. Waiting ${delay / 1000}s...`);
