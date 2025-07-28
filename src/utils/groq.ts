@@ -13,20 +13,24 @@ const prompts = [
     type: "category",
     message: `Você deve analisar o texto e retornar um objeto JSON com a seguinte estrutura:
 {
-  "categories": ["categoria1", "categoria2"],
-  "entities": ["entidade1", "entidade2"],
+  "categories": ["Categoria1", "Categoria2"],
+  "entities": ["Entidade1", "Entidade2"],
   "sponsored": false
 }
 
 Regras OBRIGATÓRIAS:
-- categories: lista de temas amplos em português (MÍNIMO 1, máximo 3).
+- categories: DEVE usar APENAS categorias desta lista predefinida (MÍNIMO 1, máximo 5):
+  Inteligência Artificial, Tecnologia, Educação, Segurança, Negócios, Finanças, Saúde, Software, Desenvolvimento de Software, Sistemas Operacionais, Infraestrutura, Eletrônicos, Economia, Política, Entretenimento, Esportes, Moda, Jogos, Redes Sociais, Privacidade, Direito, Internet, Carreira, Marketing, Energia, Meio Ambiente, História, Ciência, Inovação, Espaço, Startups, Mídia, Hardware, Indústria, Comércio, Produtividade, Computação, Transporte, Crime, Criptomoedas, Robótica, Engenharia, Nuvem, Código Aberto, Telecomunicações, Gestão, Comunicação, Recursos Humanos, Internet das Coisas, Realidade Virtual, Blockchain, Aprendizado de Máquina, Ciência de Dados, Bancos de Dados, Dispositivos Móveis, Arquitetura, Design, Fotografia, Viagens, Alimentação, Ética, Neurociência, Biotecnologia, Física, Biologia, Matemática, Psicologia, Geografia, Cultura, Religião, Filosofia, Literatura, Arte, Linguagem, Agricultura, Mineração, Meteorologia, Arqueologia
+
 - entities: nomes próprios relevantes (pessoas, empresas, lugares) (MÍNIMO 1). Se não houver entidades específicas, extraia o autor, fonte ou plataforma mencionada.
 - sponsored: true se o texto parece publicitário, false caso contrário
 - NUNCA retorne arrays vazios - sempre inclua pelo menos um item em categories e entities
+- Use EXATAMENTE os nomes das categorias conforme listados acima (com acentos e maiúsculas corretas)
 
 Exemplos válidos:
-{"categories":["tecnologia","educação"],"entities":["Google","Brasil"],"sponsored":false}
-{"categories":["geral"],"entities":["Newsletter"],"sponsored":false}
+{"categories":["Tecnologia","Educação"],"entities":["Google","Brasil"],"sponsored":false}
+{"categories":["Entretenimento"],"entities":["Newsletter"],"sponsored":true}
+{"categories":["Inteligência Artificial","Software"],"entities":["OpenAI","ChatGPT"],"sponsored":false}
 
 Texto para análise: `,
   },

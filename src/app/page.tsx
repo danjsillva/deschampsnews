@@ -16,7 +16,7 @@ export default async function HomePage() {
       ))}
 
       {!posts.length && (
-        <article className="border-t py-6 text-lg">
+        <article className="py-6 text-lg">
           <p>
             <strong>As notícias de hoje chegam lá pelas 11:30.</strong> Veja a
             última newsletter{" "}

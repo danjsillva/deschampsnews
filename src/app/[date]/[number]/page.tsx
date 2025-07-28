@@ -15,7 +15,7 @@ export default async function PostPage({ params }: IProps) {
       {post ? (
         <Post key={post._id?.toString()} post={post} />
       ) : (
-        <article className="border-t py-6 text-lg">
+        <article className="py-6 text-lg">
           <p>
             <strong>Postagem não encontrada.</strong>
           </p>

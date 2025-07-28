@@ -18,7 +18,7 @@ export default async function PostsPage({ params }: IProps) {
       ))}
 
       {!posts.length && (
-        <article className="border-t py-6 text-lg">
+        <article className="py-6 text-lg">
           <p>
             <strong>Nenhuma postagem encontrada.</strong>
           </p>

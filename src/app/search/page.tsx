@@ -3,12 +3,12 @@ import { searchPosts } from "@/services/post";
 import { IPost } from "@/types/post";
 
 interface IProps {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ query?: string; category?: string }>;
 }
 
 export default async function SearchPage({ searchParams }: IProps) {
-  const { q: query } = await searchParams;
-  const posts = query ? await searchPosts({ query }) : [];
+  const { query, category } = await searchParams;
+  const posts = query || category ? await searchPosts({ query: query || "", category }) : [];
 
   return (
     <section>
@@ -17,7 +17,7 @@ export default async function SearchPage({ searchParams }: IProps) {
       ))}
 
       {!posts.length && (
-        <article className="border-t py-6 text-lg">
+        <article className="py-6 text-lg">
           <p>
             <strong>Nenhuma postagem encontrada.</strong>
           </p>

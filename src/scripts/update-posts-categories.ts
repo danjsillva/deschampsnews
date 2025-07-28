@@ -35,15 +35,15 @@ async function main() {
         `Processing post ${post._id}... (${index + 1}/${posts.length})`,
       );
 
-      const response = await getGroqCategory({
+      const { categories, entities, sponsored } = await getGroqCategory({
         text: post.text,
       });
 
       console.log({
         ...post,
-        categories: response.categories,
-        entities: response.entities,
-        sponsored: response.sponsored,
+        categories: categories,
+        entities: entities,
+        sponsored: sponsored,
       });
 
       const updatedPost = await db.collection("posts").updateOne(
@@ -51,9 +51,9 @@ async function main() {
         {
           $set: {
             ...post,
-            categories: response.categories,
-            entities: response.entities,
-            sponsored: response.sponsored,
+            categories: categories,
+            entities: entities,
+            sponsored: sponsored,
           },
         },
       );
@@ -67,9 +67,9 @@ async function main() {
     }
 
     if (index % 2 === 0) {
-      console.log("Sleeping for 30 seconds...");
+      console.log("Sleeping for 5 seconds...");
 
-      await sleep(30000);
+      await sleep(5000);
     }
   }
 
