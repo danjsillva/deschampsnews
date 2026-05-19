@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { FiHeart } from "react-icons/fi";
 
 // import { likePost } from "@/services/post";
@@ -11,8 +12,10 @@ interface IProps {
 }
 
 export default function Post(props: IProps) {
+  const [likes, setLikes] = useState(props.likes);
+
   const handleLikeClick = async () => {
-    props.likes++;
+    setLikes((currentLikes) => currentLikes + 1);
 
     // await likePost({
     //   date: props.date,
@@ -27,7 +30,7 @@ export default function Post(props: IProps) {
         size={20}
         className="mr-2 cursor-pointer"
       />{" "}
-      {props.likes}
+      {likes}
     </div>
   );
 }

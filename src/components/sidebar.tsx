@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useRef } from "react";
 import Calendar from "react-calendar";
 import { FaTimes } from "react-icons/fa";
 
@@ -22,13 +22,7 @@ export default function Sidebar() {
   const searchParams = useSearchParams();
   const queryParam = searchParams.get("query") || "";
   const categoryParam = searchParams.get("category") || "";
-  const [search, setSearch] = useState(queryParam);
-  const [selectedCategory, setSelectedCategory] = useState(categoryParam);
-
-  useEffect(() => {
-    setSearch(queryParam);
-    setSelectedCategory(categoryParam);
-  }, [queryParam, categoryParam]);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const getSelectedDate = () => {
     const dateMatch = pathname.match(/^\/(\d{4}-\d{2}-\d{2})$/);
@@ -52,10 +46,12 @@ export default function Sidebar() {
 
   const handleSubmitSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const search = String(formData.get("query") || "");
 
     if (search?.trim()) {
-      const url = selectedCategory
-        ? `/search?query=${encodeURIComponent(search.trim())}&category=${encodeURIComponent(selectedCategory)}`
+      const url = categoryParam
+        ? `/search?query=${encodeURIComponent(search.trim())}&category=${encodeURIComponent(categoryParam)}`
         : `/search?query=${encodeURIComponent(search.trim())}`;
       return router.push(url);
     }
@@ -64,14 +60,11 @@ export default function Sidebar() {
   };
 
   const handleClearSearch = () => {
-    setSearch("");
-    setSelectedCategory("");
-
     return router.push("/");
   };
 
   const handleCategoryClick = (category: string) => {
-    setSelectedCategory(category);
+    const search = searchInputRef.current?.value || queryParam;
 
     if (search?.trim()) {
       return router.push(
@@ -106,13 +99,15 @@ export default function Sidebar() {
       <form onSubmit={handleSubmitSearch} className="mt-10 w-full">
         <div className="border border-gray-200 rounded py-3 px-4">
           <input
+            ref={searchInputRef}
+            key={queryParam}
+            name="query"
             type="text"
-            value={search}
+            defaultValue={queryParam}
             className="outline-none w-full"
-            onChange={(e) => setSearch(e.target.value)}
           />
 
-          {search && (
+          {queryParam && (
             <span
               className="text-sm text-gray-400 cursor-pointer"
               onClick={handleClearSearch}
@@ -129,7 +124,7 @@ export default function Sidebar() {
             key={category}
             onClick={() => handleCategoryClick(category)}
             className={`inline-block text-sm rounded-full py-1 px-2 mb-2 mr-2 cursor-pointer ${
-              selectedCategory === category
+              categoryParam === category
                 ? "text-white bg-blue-500 font-semibold"
                 : "text-gray-500 bg-gray-100"
             }`}
