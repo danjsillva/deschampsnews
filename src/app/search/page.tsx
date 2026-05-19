@@ -2,6 +2,8 @@ import Post from "@/components/post";
 import { searchPosts } from "@/services/post";
 import { IPost } from "@/types/post";
 
+export const dynamic = "force-dynamic";
+
 interface IProps {
   searchParams: Promise<{ query?: string; category?: string }>;
 }

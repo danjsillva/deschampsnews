@@ -21,4 +21,6 @@ const connect = async (): Promise<Db> => {
   return db;
 };
 
-export default { connect };
+const mongodb = { connect };
+
+export default mongodb;

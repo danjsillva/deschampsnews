@@ -5,6 +5,8 @@ import { getPostsByDate } from "@/services/post";
 import { IPost } from "@/types/post";
 import dayjs from "@/utils/dayjs";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const date = dayjs().format("YYYY-MM-DD");
   const posts = await getPostsByDate({ date });

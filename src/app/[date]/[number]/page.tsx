@@ -2,6 +2,8 @@ import Post from "@/components/post";
 import { getPostByDateAndNumber } from "@/services/post";
 import dayjs from "@/utils/dayjs";
 
+export const dynamic = "force-dynamic";
+
 interface IProps {
   params: Promise<{ date: string; number: string }>;
 }
