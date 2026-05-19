@@ -3,6 +3,8 @@ import { getPostsByDate } from "@/services/post";
 import { IPost } from "@/types/post";
 import dayjs from "@/utils/dayjs";
 
+export const dynamic = "force-dynamic";
+
 interface IProps {
   params: Promise<{ date: string }>;
 }
